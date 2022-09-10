@@ -5,16 +5,16 @@ const io = require('socket.io');
 const cors = require('cors');
 
 const FETCH_INTERVAL = 5000;
-const PORT = process.env.PORT || 4000;
+const PORT = 4000;
 
 const tickers = [
-  'AAPL', // Apple
-  'GOOGL', // Alphabet
-  'MSFT', // Microsoft
-  'AMZN', // Amazon
-  'FB', // Facebook
-  'TSLA', // Tesla
-];
+  'AAPL',
+  'GOOGL', 
+  'MSFT', 
+  'AMZN', 
+  'FB', 
+  'TSLA', 
+]; // компании
 
 function randomValue(min = 0, max = 1, precision = 0) {
   const random = Math.random() * (max - min) + min;
@@ -43,16 +43,28 @@ function getQuotes(socket) {
 }
 
 function trackTickers(socket) {
-  // run the first time immediately
+
   getQuotes(socket);
 
-  // every N seconds
-  const timer = setInterval(function() {
+
+  let timer = setInterval(function() {
     getQuotes(socket);
   }, FETCH_INTERVAL);
 
+  socket.on('delay', (value) => {
+    console.log(value);
+
+    clearInterval(timer);
+
+    timer = setInterval(() => {
+      getQuotes(socket);
+    }, value * 1000);
+  });
+
+
   socket.on('disconnect', function() {
     clearInterval(timer);
+    console.log('user disconnected');
   });
 }
 
@@ -64,10 +76,6 @@ const socketServer = io(server, {
   cors: {
     origin: "*",
   }
-});
-
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/index.html');
 });
 
 socketServer.on('connection', (socket) => {
