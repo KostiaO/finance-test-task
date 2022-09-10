@@ -1,0 +1,9 @@
+.tickerlist__item {
+  display: flex;
+
+  gap: 5px;
+}
+
+.span {
+  transition: 0.3s;
+}
